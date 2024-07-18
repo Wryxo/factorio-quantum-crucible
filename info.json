@@ -1,0 +1,9 @@
+{
+    "name": "qc-quantum-crucible",
+    "version": "0.1.0",
+    "title": "Quantum Crucible",
+    "author": "Wryxo",
+    "factorio_version": "1.1",
+    "dependencies": ["base >= 1.1"],
+    "description": "You arrived on a planet without any resources, but it has a mysterious black box that allows you to transmute anything into quantum energy that can used to synthesize anything else. Additional pathway to play through regular factorio progression"
+  }
