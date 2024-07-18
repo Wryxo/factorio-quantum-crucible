@@ -75,7 +75,7 @@ end
 
 local function check_logistic_slots(index, slots, recipes)
   local player = game.players[index]
-  log(serpent.block(recipes))
+  -- log(serpent.block(recipes))
   for _, slot in pairs(slots) do
     
     local itemCount = player.get_item_count(slot.name)
@@ -84,7 +84,7 @@ local function check_logistic_slots(index, slots, recipes)
     end
 
     local missingCount = slot.min - itemCount
-    local recipeKvantum = recipes[slot.name].ingredients[0].amount
+    local recipeKvantum = player.force.recipes["qc-destroy-" .. slot.name].ingredients[1].amount
     local requiredKvantum =  recipeKvantum * missingCount
     local availableKvantum = global.crucible.get_fluid_count("kvantum")
     if requiredKvantum > availableKvantum then
@@ -93,7 +93,9 @@ local function check_logistic_slots(index, slots, recipes)
 
     local insertedItems = player.insert({name=slot.name, count=missingCount})
     requiredKvantum = recipeKvantum * insertedItems
-    global.crucible.remove_fluid("kvantum", requiredKvantum)
+    if requiredKvantum > 0 then
+      global.crucible.remove_fluid{name = "kvantum", amount = requiredKvantum}
+    end
     ::continue::
   end
 end
@@ -116,10 +118,10 @@ end)
 script.on_event(defines.events.on_tick, function(event)
   update_crucible_amount()
 
-  local recipes = game.get_filtered_recipe_prototypes({{filter = "category", category="qc-crucible-output"}})
+  -- local recipes = game.get_filtered_recipe_prototypes({{filter = "category", category="qc-crucible-output"}})
   for index, player in pairs(global.players) do
     if (event.tick + index) % 60 == 0 then
-      check_logistic_slots(index, player.interesting_logistic_slots, recipes)
+      check_logistic_slots(index, player.interesting_logistic_slots, game.recipe_prototypes)
     end
   end
 end)
@@ -151,11 +153,16 @@ script.on_event(defines.events.on_player_trash_inventory_changed, function(event
   local player = game.players[event.player_index]
   local trashInv = player.get_inventory(defines.inventory.character_trash)
   local items = trashInv.get_contents()
+  if table_size(items) == 0 then
+    return
+  end
   local kvantumGained = 0
-  local recipes = game.get_filtered_recipe_prototypes({{filter = "category", category="qc-crucible-input"}})
   for name, count in pairs(items) do
-    kvantumGained = kvantumGained + (recipes[name].results[0].amount * count)
+    kvantumGained = kvantumGained + (player.force.recipes["qc-destroy-" .. name].products[1].amount * count)
   end
   trashInv.clear()
-  global.crucible.insert_fluid({name="kvantum", amount=kvantumGained})
+  
+  if kvantumGained > 0 then
+    global.crucible.insert_fluid({name="kvantum", amount=kvantumGained})
+  end
 end)
