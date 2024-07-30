@@ -10,8 +10,8 @@ quantumCrucible.icons = {
 }
 quantumCrucible.fluid_box =
 {
-    base_area = 10000,
-    height = 10000,
+    base_area = 10^12,
+    height = 10^12,
     pipe_covers = pipecoverspictures(),
     pipe_connections =
     {
@@ -32,11 +32,15 @@ quantumCrucible.fluid_box =
 
 local qcInputMachine = table.deepcopy(data.raw["furnace"]["electric-furnace"])
 qcInputMachine.name = "qc-crucible-input"
+qcInputMachine.allow_copy_paste = false
 qcInputMachine.allowed_effects = {}
 qcInputMachine.crafting_categories = { "qc-crucible-input" }
-qcInputMachine.crafting_speed = 100000
+qcInputMachine.crafting_speed = 10000
 qcInputMachine.energy_source = { type = "void" }
 qcInputMachine.energy_usage = "1W"
+qcInputMachine.flags = {"not-rotatable", "not-deconstructable", "not-blueprintable", "not-flammable", "not-upgradable"}
+qcInputMachine.minable = nil
+qcInputMachine.fast_replaceable_group = "crucible-io"
 qcInputMachine.fluid_boxes = {
   {
     base_area = 100,
@@ -504,7 +508,6 @@ qcInputMachine.fluid_boxes = {
       north = -1
     }
   },
-  off_when_no_fluid_recipe = true
 }
 qcInputMachine.module_specification = {}
 qcInputMachine.tile_width = 1
@@ -590,11 +593,19 @@ qcInputMachine.animation = {
 
 local qcOutputMachine = table.deepcopy(data.raw["assembling-machine"]["assembling-machine-3"])
 qcOutputMachine.name = "qc-crucible-output"
+-- qcOutputMachine.allow_copy_paste = false
 qcOutputMachine.allowed_effects = {}
 qcOutputMachine.crafting_categories = { "qc-crucible-output" }
-qcOutputMachine.crafting_speed = 100000
+qcOutputMachine.crafting_speed = 10000
 qcOutputMachine.energy_source = { type = "void" }
 qcOutputMachine.energy_usage = "1W"
+qcOutputMachine.flags = {"not-rotatable"
+                        , "not-deconstructable"
+                        , "not-blueprintable"
+                        , "not-flammable"
+                        , "not-upgradable"}
+qcOutputMachine.minable = nil
+qcOutputMachine.fast_replaceable_group = "crucible-io"
 qcOutputMachine.fluid_boxes = {
   {
     base_area = 10,
@@ -1062,7 +1073,6 @@ qcOutputMachine.fluid_boxes = {
       north = -1
     }
   },
-  off_when_no_fluid_recipe = true
 }
 qcOutputMachine.module_specification = {}
 qcOutputMachine.tile_width = 1
