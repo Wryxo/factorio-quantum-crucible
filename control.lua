@@ -58,19 +58,10 @@ local function build_crucible_io(x, y, pos, io_type)
     direction = defines.direction.south
   end
 
-  if io_type == "input" then
     return game.surfaces[1].create_entity{
     name = "qc-crucible-" .. io_type, position = {x + pos.position[1], y + pos.position[2]}, direction = direction,
     force = game.forces["player"]
     }
-  end
-
-  local x = game.surfaces[1].create_entity{
-    name = "qc-crucible-" .. io_type, position = {x + pos.position[1], y + pos.position[2]}, direction = direction,
-    force = game.forces["player"], recipe="qc-output-wood"
-  }
-  x.set_recipe(nil)
-  return x
 end
 
 local function build_crucible(x, y, kvantum)
@@ -108,7 +99,7 @@ script.on_init(function()
 
   game.forces["player"].technologies["quantum-slots"].researched = true
   global.crucibles = {}
-  table.insert(global.crucibles, build_crucible(5,10, 10000))
+  table.insert(global.crucibles, build_crucible(4,9, 10000))
   -- for _, c in pairs(global.crucibles) do
   --   for _, o in pairs(c) do
   --     if o.position ~= nil then
@@ -116,6 +107,58 @@ script.on_init(function()
   --     end
   --   end
   -- end
+end)
+
+local kvantumInventories = {
+  defines.inventory.assembling_machine_input,
+  defines.inventory.furnace_result
+}
+local itemInventories = {
+  defines.inventory.assembling_machine_output,
+  defines.inventory.furnace_source
+}
+
+script.on_event('qc-flip-io-key',function(e)
+  local p = game.players[e.player_index]
+  local selected_entity = p.selected
+  if selected_entity and (selected_entity.name == 'qc-crucible-input' or selected_entity.name == 'qc-crucible-output') then
+    local nearest_distance = 10^16
+    local nearest_crucible = nil
+    for _, c in pairs(global.crucibles) do
+      if util.distance(c.position, selected_entity.position) < nearest_distance then
+        nearest_crucible = c 
+      end
+    end
+
+    local diffPosition = {selected_entity.position['x'] - nearest_crucible.position[1] - 0.5, selected_entity.position['y'] - nearest_crucible.position[2] - 0.5}
+    local direction = ""
+
+    for _, pos in pairs(crucible_io_positions) do
+      if pos.position[1] == diffPosition[1] then
+        if pos.position[2] == diffPosition[2] then
+          local p = game.players[e.player_index]
+          for _, i in pairs(itemInventories) do
+            local inventory = selected_entity.get_inventory(i)
+            if inventory ~= nil then
+              local contents = inventory.get_contents()
+              for item, amount in pairs(contents) do
+                p.insert({name=item, count=amount})
+              end
+            end
+          end
+          local kvantumGained = selected_entity.get_fluid_count("kvantum")
+          if kvantumGained > 0 then
+            nearest_crucible.crucible.insert_fluid({name="kvantum", amount=kvantumGained})
+          end
+
+          local iotype = selected_entity.name == 'qc-crucible-input' and "output" or "input"
+          selected_entity.destroy()
+          nearest_crucible[direction] = build_crucible_io(nearest_crucible.position[1], nearest_crucible.position[2], pos, iotype)
+        end
+      end
+    end
+    nearest_crucible.crucible.update_connections()
+  end
 end)
 
 local function update_crucible_amount()

@@ -15,20 +15,23 @@ quantumCrucible.fluid_box =
     pipe_covers = pipecoverspictures(),
     pipe_connections =
     {
-    { position = {-1, -2} },
-    { position = {0, -2} },
-    { position = {1, -2} },
-    { position = {2, -1} },
-    { position = {2, 0} },
-    { position = {2, 1} },
-    { position = {1, 2} },
-    { position = {0, 2} },
-    { position = {-1, 2} },
-    { position = {-2, -1} },
-    { position = {-2, 0} },
-    { position = {-2, 1} }
+      { position = {-1, -2} },
+      { position = {0, -2} },
+      { position = {1, -2} },
+      { position = {2, -1} },
+      { position = {2, 0} },
+      { position = {2, 1} },
+      { position = {1, 2} },
+      { position = {0, 2} },
+      { position = {-1, 2} },
+      { position = {-2, -1} },
+      { position = {-2, 0} },
+      { position = {-2, 1} }
     }
 }
+quantumCrucible.flags = {"not-rotatable", "not-deconstructable", "not-blueprintable", "not-flammable", "not-upgradable"}
+quantumCrucible.minable = nil
+quantumCrucible.hide_connection_info = true
 
 local qcInputMachine = table.deepcopy(data.raw["furnace"]["electric-furnace"])
 qcInputMachine.name = "qc-crucible-input"
@@ -534,58 +537,45 @@ qcInputMachine.selection_box = {
   }
 qcInputMachine.next_upgrade = nil
 qcInputMachine.animation = {
-  layers = {
+  layers =
+  {
     {
-      filename = "__base__/graphics/entity/steel-chest/steel-chest.png",
-      frame_count = 1,
-      height = 40,
-      hr_version = {
-        filename = "__base__/graphics/entity/steel-chest/hr-steel-chest.png",
-        frame_count = 1,
-        height = 80,
-        line_length = 1,
-        priority = "extra-high",
-        scale = 0.5,
-        shift = {
-          -0.0078125,
-          -0.015625
-        },
-        width = 64
-      },
-      line_length = 1,
+      filename = "__base__/graphics/entity/logistic-chest/logistic-chest-requester.png",
       priority = "extra-high",
-      shift = {
-        0,
-        -0.015625
-      },
-      width = 32
+      width = 34,
+      height = 38,
+      frame_count = 7,
+      shift = util.by_pixel(0, -2),
+      hr_version =
+      {
+        filename = "__base__/graphics/entity/logistic-chest/hr-logistic-chest-requester.png",
+        priority = "extra-high",
+        width = 66,
+        height = 74,
+        frame_count = 7,
+        shift = util.by_pixel(0, -2),
+        scale = 0.5
+      }
     },
     {
-      draw_as_shadow = true,
-      filename = "__base__/graphics/entity/steel-chest/steel-chest-shadow.png",
-      frame_count = 1,
-      height = 22,
-      hr_version = {
-        draw_as_shadow = true,
-        filename = "__base__/graphics/entity/steel-chest/hr-steel-chest-shadow.png",
-        frame_count = 1,
-        height = 46,
-        line_length = 1,
-        priority = "extra-high",
-        scale = 0.5,
-        shift = {
-          0.3828125,
-          0.25
-        },
-        width = 110
-      },
-      line_length = 1,
+      filename = "__base__/graphics/entity/logistic-chest/logistic-chest-shadow.png",
       priority = "extra-high",
-      shift = {
-        0.375,
-        0.234375
-      },
-      width = 56
+      width = 56,
+      height = 24,
+      repeat_count = 7,
+      shift = util.by_pixel(12, 5),
+      draw_as_shadow = true,
+      hr_version =
+      {
+        filename = "__base__/graphics/entity/logistic-chest/hr-logistic-chest-shadow.png",
+        priority = "extra-high",
+        width = 112,
+        height = 46,
+        repeat_count = 7,
+        shift = util.by_pixel(12, 4.5),
+        draw_as_shadow = true,
+        scale = 0.5
+      }
     }
   }
 }
@@ -593,7 +583,6 @@ qcInputMachine.animation = {
 
 local qcOutputMachine = table.deepcopy(data.raw["assembling-machine"]["assembling-machine-3"])
 qcOutputMachine.name = "qc-crucible-output"
--- qcOutputMachine.allow_copy_paste = false
 qcOutputMachine.allowed_effects = {}
 qcOutputMachine.crafting_categories = { "qc-crucible-output" }
 qcOutputMachine.crafting_speed = 10000
@@ -1099,58 +1088,45 @@ qcOutputMachine.selection_box = {
   }
 qcOutputMachine.next_upgrade = nil
 qcOutputMachine.animation = {
-  layers = {
+  layers =
+  {
     {
-      filename = "__base__/graphics/entity/steel-chest/steel-chest.png",
-      frame_count = 1,
-      height = 40,
-      hr_version = {
-        filename = "__base__/graphics/entity/steel-chest/hr-steel-chest.png",
-        frame_count = 1,
-        height = 80,
-        line_length = 1,
-        priority = "extra-high",
-        scale = 0.5,
-        shift = {
-          -0.0078125,
-          -0.015625
-        },
-        width = 64
-      },
-      line_length = 1,
+      filename = "__base__/graphics/entity/logistic-chest/logistic-chest-passive-provider.png",
       priority = "extra-high",
-      shift = {
-        0,
-        -0.015625
-      },
-      width = 32
+      width = 34,
+      height = 38,
+      frame_count = 7,
+      shift = util.by_pixel(0, -2),
+      hr_version =
+      {
+        filename = "__base__/graphics/entity/logistic-chest/hr-logistic-chest-passive-provider.png",
+        priority = "extra-high",
+        width = 66,
+        height = 74,
+        frame_count = 7,
+        shift = util.by_pixel(0, -2),
+        scale = 0.5
+      }
     },
     {
-      draw_as_shadow = true,
-      filename = "__base__/graphics/entity/steel-chest/steel-chest-shadow.png",
-      frame_count = 1,
-      height = 22,
-      hr_version = {
-        draw_as_shadow = true,
-        filename = "__base__/graphics/entity/steel-chest/hr-steel-chest-shadow.png",
-        frame_count = 1,
-        height = 46,
-        line_length = 1,
-        priority = "extra-high",
-        scale = 0.5,
-        shift = {
-          0.3828125,
-          0.25
-        },
-        width = 110
-      },
-      line_length = 1,
+      filename = "__base__/graphics/entity/logistic-chest/logistic-chest-shadow.png",
       priority = "extra-high",
-      shift = {
-        0.375,
-        0.234375
-      },
-      width = 56
+      width = 56,
+      height = 24,
+      repeat_count = 7,
+      shift = util.by_pixel(12, 5),
+      draw_as_shadow = true,
+      hr_version =
+      {
+        filename = "__base__/graphics/entity/logistic-chest/hr-logistic-chest-shadow.png",
+        priority = "extra-high",
+        width = 112,
+        height = 46,
+        repeat_count = 7,
+        shift = util.by_pixel(12, 4.5),
+        draw_as_shadow = true,
+        scale = 0.5
+      }
     }
   }
 }

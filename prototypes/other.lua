@@ -41,4 +41,12 @@ local quantum_slots = {
     }
   }
 
-  data:extend{quantum_slots}
+data:extend{quantum_slots}
+
+data:extend{{
+  type                = 'custom-input'    ,
+  name                = 'qc-flip-io-key'  ,
+  linked_game_control = 'rotate'          ,
+  key_sequence        = ''                ,
+  consuming           =  nil              , 
+}}
