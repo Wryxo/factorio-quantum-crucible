@@ -99,14 +99,7 @@ script.on_init(function()
 
   game.forces["player"].technologies["quantum-slots"].researched = true
   global.crucibles = {}
-  table.insert(global.crucibles, build_crucible(4,9, 10000))
-  -- for _, c in pairs(global.crucibles) do
-  --   for _, o in pairs(c) do
-  --     if o.position ~= nil then
-  --       log(serpent.block(o.position))
-  --     end
-  --   end
-  -- end
+  table.insert(global.crucibles, build_crucible(10, 10, 10000))
 end)
 
 local kvantumInventories = {
@@ -166,7 +159,8 @@ local function update_crucible_amount()
     local progressbar = player.gui.top.kvantumBar
     local current = global.crucibles[1].crucible.get_fluid_count("kvantum")
     local max = global.crucibles[1].crucible.fluidbox.get_capacity(1)
-    progressbar.caption = "Kvantum: " .. format_number(current,true,10^5) .. " / " .. format_number(max, true, 0)
+    -- progressbar.caption = "Kvantum: " .. format_number(current,true,10^6) .. " / " .. format_number(max, true, 0)
+    progressbar.caption = format_number(current,true,10^6)
     progressbar.value = current / max
   end
 end
@@ -211,7 +205,8 @@ script.on_event(defines.events.on_player_created, function(event)
     progressbar.style.color = {r=0.7, g=0, b=0.7, a=0.3}
     local current = global.crucibles[1].crucible.get_fluid_count("kvantum")
     local max = global.crucibles[1].crucible.fluidbox.get_capacity(1)
-    progressbar.caption = "Kvantum: " .. format_number(current,true,10^6) .. " / " .. format_number(max, true, 0)
+    -- progressbar.caption = "Kvantum: " .. format_number(current,true,10^6) .. " / " .. format_number(max, true, 0)
+    progressbar.caption = format_number(current,true,10^6)
     progressbar.value = current / max
   --   local list = {}
   --   for _, recipe in pairs(player.force.recipes) do

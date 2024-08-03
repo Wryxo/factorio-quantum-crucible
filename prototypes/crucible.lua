@@ -41,12 +41,19 @@ qcInputMachine.crafting_categories = { "qc-crucible-input" }
 qcInputMachine.crafting_speed = 10000
 qcInputMachine.energy_source = { type = "void" }
 qcInputMachine.energy_usage = "1W"
-qcInputMachine.flags = {"not-rotatable", "not-deconstructable", "not-blueprintable", "not-flammable", "not-upgradable"}
+qcInputMachine.flags = {"player-creation"
+, "not-rotatable"
+, "not-deconstructable"
+, "not-blueprintable"
+, "not-flammable"
+, "not-upgradable"
+}
 qcInputMachine.minable = nil
 qcInputMachine.fast_replaceable_group = "crucible-io"
 qcInputMachine.fluid_boxes = {
   {
-    base_area = 100,
+    base_area = 10^12,
+    height = 10^12,
     base_level = -1,
     pipe_connections = {
       {
@@ -279,7 +286,8 @@ qcInputMachine.fluid_boxes = {
     }
   },
   {
-    base_area = 100,
+    base_area = 10^12,
+    height = 10^12,
     base_level = 1,
     pipe_connections = {
       {
@@ -588,16 +596,19 @@ qcOutputMachine.crafting_categories = { "qc-crucible-output" }
 qcOutputMachine.crafting_speed = 10000
 qcOutputMachine.energy_source = { type = "void" }
 qcOutputMachine.energy_usage = "1W"
-qcOutputMachine.flags = {"not-rotatable"
+qcOutputMachine.flags = {"player-creation"
+                        , "not-rotatable"
                         , "not-deconstructable"
                         , "not-blueprintable"
                         , "not-flammable"
-                        , "not-upgradable"}
+                        , "not-upgradable"
+                      }
 qcOutputMachine.minable = nil
 qcOutputMachine.fast_replaceable_group = "crucible-io"
 qcOutputMachine.fluid_boxes = {
   {
-    base_area = 10,
+    base_area = 10^12,
+    height = 10^12,
     base_level = -1,
     pipe_connections = {
       {
@@ -830,7 +841,8 @@ qcOutputMachine.fluid_boxes = {
     }
   },
   {
-    base_area = 100,
+    base_area = 10^12,
+    height = 10^12,
     base_level = 1,
     pipe_connections = {
       {
