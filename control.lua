@@ -33,61 +33,48 @@ function format_number(amount, append_suffix, minimum)
 end
 
 local crucible_io_positions = {
+    { name = "dnw", position = {-2, -2} },
     { name = "nw", position = {-1, -2} },
     { name = "n", position = {0, -2} },
     { name = "ne", position = {1, -2} },
+    { name = "dne", position = {2, -2} },
     { name = "en", position = {2, -1} },
     { name = "e", position = {2, 0} },
     { name = "es", position = {2, 1} },
+    { name = "dse", position = {2, 2} },
     { name = "se", position = {1, 2} },
     { name = "s", position = {0, 2} },
     { name = "sw", position = {-1, 2} },
+    { name = "dsw", position = {-2, 2} },
     { name = "ws", position = {-2, 1} },
     { name = "w", position = {-2, 0} },
     { name = "wn", position = {-2, -1} }
 }
 
-local function build_crucible_io(x, y, pos, io_type)
-  local capital_direction = pos.name:sub(1,1)
-  local direction = defines.direction.west
-  if capital_direction == "n" then
-    direction = defines.direction.north
-  elseif capital_direction == "e" then
-    direction = defines.direction.east
-  elseif capital_direction == "s" then
-    direction = defines.direction.south
-  end
-
+local function build_crucible_io(x, y, pos)
     return game.surfaces[1].create_entity{
-    name = "qc-crucible-" .. io_type, position = {x + pos.position[1], y + pos.position[2]}, direction = direction,
+    name = "qc-quantum-crucible-io", position = {x + pos.position[1], y + pos.position[2]}, 
     force = game.forces["player"]
     }
 end
 
 local function build_crucible(x, y, kvantum)
-  local crucible = game.surfaces[1].create_entity{
-    name = "qc-quantum-crucible", position = {x, y},
+  local crucibleRoboport = game.surfaces[1].create_entity{
+    name = "qc-quantum-crucible", position = {x, y}, direction = defines.direction.east,
     force = game.forces["player"]
   }
-  crucible.insert_fluid({name="kvantum", amount=kvantum})
+
   local crucibleInfo = {
     position = {x, y},
-    crucible = crucible
+    crucible = crucibleRoboport,
+    io = {}
   }
 
-  next_input = true
   for _, pos in pairs(crucible_io_positions) do
-    io_type = next_input and "input" or "output"
-    crucibleInfo[pos.name] = build_crucible_io(x, y, pos, io_type)
-    next_input = not next_input
+    crucibleInfo['io'][pos.name] = build_crucible_io(x, y, pos)
   end
 
   return crucibleInfo
-
-  -- global.crucibleRoboport = game.surfaces[1].create_entity{
-  --   name = "roboport", position = {5, 10}, direction = defines.direction.east,
-  --   force = game.forces["player"]
-  -- }
 end
 
 script.on_init(function()
@@ -98,75 +85,45 @@ script.on_init(function()
   end
 
   game.forces["player"].technologies["quantum-slots"].researched = true
+  global.kvantum = 10000
+  global.kvantum_max = 10^9
+
   global.crucibles = {}
-  table.insert(global.crucibles, build_crucible(10, 10, 10000))
-end)
-
-local kvantumInventories = {
-  defines.inventory.assembling_machine_input,
-  defines.inventory.furnace_result
-}
-local itemInventories = {
-  defines.inventory.assembling_machine_output,
-  defines.inventory.furnace_source
-}
-
-script.on_event('qc-flip-io-key',function(e)
-  local p = game.players[e.player_index]
-  local selected_entity = p.selected
-  if selected_entity and (selected_entity.name == 'qc-crucible-input' or selected_entity.name == 'qc-crucible-output') then
-    local nearest_distance = 10^16
-    local nearest_crucible = nil
-    for _, c in pairs(global.crucibles) do
-      if util.distance(c.position, selected_entity.position) < nearest_distance then
-        nearest_crucible = c 
-      end
-    end
-
-    local diffPosition = {selected_entity.position['x'] - nearest_crucible.position[1] - 0.5, selected_entity.position['y'] - nearest_crucible.position[2] - 0.5}
-    local direction = ""
-
-    for _, pos in pairs(crucible_io_positions) do
-      if pos.position[1] == diffPosition[1] then
-        if pos.position[2] == diffPosition[2] then
-          local p = game.players[e.player_index]
-          for _, i in pairs(itemInventories) do
-            local inventory = selected_entity.get_inventory(i)
-            if inventory ~= nil then
-              local contents = inventory.get_contents()
-              for item, amount in pairs(contents) do
-                p.insert({name=item, count=amount})
-              end
-            end
-          end
-          local kvantumGained = selected_entity.get_fluid_count("kvantum")
-          if kvantumGained > 0 then
-            nearest_crucible.crucible.insert_fluid({name="kvantum", amount=kvantumGained})
-          end
-
-          local iotype = selected_entity.name == 'qc-crucible-input' and "output" or "input"
-          selected_entity.destroy()
-          nearest_crucible[direction] = build_crucible_io(nearest_crucible.position[1], nearest_crucible.position[2], pos, iotype)
-        end
-      end
-    end
-    nearest_crucible.crucible.update_connections()
-  end
+  table.insert(global.crucibles, build_crucible(10, 10))
 end)
 
 local function update_crucible_amount()
   for _, player in pairs(game.connected_players) do
     local progressbar = player.gui.top.kvantumBar
-    local current = global.crucibles[1].crucible.get_fluid_count("kvantum")
-    local max = global.crucibles[1].crucible.fluidbox.get_capacity(1)
+    local current = global.kvantum
+    local max = global.kvantum_max
     -- progressbar.caption = "Kvantum: " .. format_number(current,true,10^6) .. " / " .. format_number(max, true, 0)
     progressbar.caption = format_number(current,true,10^6)
     progressbar.value = current / max
   end
 end
 
+local function is_within_crucible_range(player)
+  if global.crucibles then
+    for _, crucible in pairs(global.crucibles) do
+      for _, point in pairs(crucible.crucible.logistic_network.provider_points) do
+        if point.logistic_member_index > 0  then
+          if point.owner.player == player then
+            return true
+          end
+        end
+      end
+    end
+  end
+
+  return false
+end
+
 local function check_logistic_slots(index, slots, recipes)
   local player = game.players[index]
+  if not player.character_personal_logistic_requests_enabled or not is_within_crucible_range(player) then
+    return
+  end
   for _, slot in pairs(slots) do
     
     local itemCount = player.get_item_count(slot.name)
@@ -181,16 +138,15 @@ local function check_logistic_slots(index, slots, recipes)
     local missingCount = slot.min - itemCount
     local recipeKvantum = player.force.recipes["qc-output-" .. slot.name].ingredients[1].amount
     local requiredKvantum =  recipeKvantum * missingCount
-    local availableKvantum = global.crucibles[1].crucible.get_fluid_count("kvantum")
-    if requiredKvantum > availableKvantum then
-      missingCount = math.floor(availableKvantum / recipeKvantum)
+    if requiredKvantum > global.kvantum then
+      missingCount = math.floor(global.kvantum / recipeKvantum)
     end
 
     if missingCount > 0 then
       local insertedItems = player.insert({name=slot.name, count=missingCount})
       requiredKvantum = recipeKvantum * insertedItems
       if requiredKvantum > 0 then
-        global.crucibles[1].crucible.remove_fluid{name = "kvantum", amount = requiredKvantum}
+        global.kvantum = global.kvantum - requiredKvantum
       end
     end
     ::continue::
@@ -203,35 +159,18 @@ script.on_event(defines.events.on_player_created, function(event)
     global.players[event.player_index] = { interesting_logistic_slots = {}}
 
     local progressbar = player.gui.top.add{type="progressbar", name="kvantumBar"}
+    progressbar.style.horizontal_align = "center"
     progressbar.style.bar_width = 30
     progressbar.style.color = {r=0.7, g=0, b=0.7, a=0.3}
-    local current = global.crucibles[1].crucible.get_fluid_count("kvantum")
-    local max = global.crucibles[1].crucible.fluidbox.get_capacity(1)
-    -- progressbar.caption = "Kvantum: " .. format_number(current,true,10^6) .. " / " .. format_number(max, true, 0)
+    local current = global.kvantum
+    local max = global.kvantum_max
     progressbar.caption = format_number(current,true,10^6)
-    progressbar.value = current / max
-  --   local list = {}
-  --   for _, recipe in pairs(player.force.recipes) do
-  --     if recipe.hidden == false then
-  --         list[#list+1] = {
-  --             name=recipe.name,
-  --             products=recipe.products,
-  --             ingredients=recipe.ingredients,
-  --             group=recipe.group,
-  --             subgroup=recipe.subgroup,
-  --             order=recipe.order,
-  --             energy=recipe.energy
-  --         }
-  --     end
-  --   end
-  -- game.write_file("recipes.json", game.table_to_json(list))
-  
+    progressbar.value = current / max 
 end)
 
 script.on_event(defines.events.on_tick, function(event)
   update_crucible_amount()
 
-  -- local recipes = game.get_filtered_recipe_prototypes({{filter = "category", category="qc-crucible-output"}})
   for index, player in pairs(global.players) do
     if (event.tick + index) % 10 == 0 then
       check_logistic_slots(index, player.interesting_logistic_slots, game.recipe_prototypes)
@@ -264,6 +203,9 @@ end)
 
 script.on_event(defines.events.on_player_trash_inventory_changed, function(event)
   local player = game.players[event.player_index]
+  if not player.character_personal_logistic_requests_enabled or not is_within_crucible_range(player) then
+    return
+  end
   local trashInv = player.get_inventory(defines.inventory.character_trash)
   local items = trashInv.get_contents()
   if table_size(items) == 0 then
@@ -276,6 +218,6 @@ script.on_event(defines.events.on_player_trash_inventory_changed, function(event
   trashInv.clear()
   
   if kvantumGained > 0 then
-    global.crucibles[1].crucible.insert_fluid({name="kvantum", amount=kvantumGained})
+    global.kvantum = global.kvantum + kvantumGained
   end
 end)
