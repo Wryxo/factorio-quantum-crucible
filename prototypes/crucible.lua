@@ -26,6 +26,7 @@ qcCrucibleIO.name = "qc-quantum-crucible-io"
 qcCrucibleIO.render_not_in_network_icon = false
 qcCrucibleIO.minable = nil
 qcCrucibleIO.flags = {"placeable-player", "not-deconstructable", "not-blueprintable", "not-flammable", "not-upgradable", "player-creation"}
+qcCrucibleIO.max_logistic_slots = 10
 
 
 data:extend{qcCrucibleIO
