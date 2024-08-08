@@ -1,28 +1,4 @@
--- Setup Kvantum and recipe to make kvantum out of kvantum
-local kvantumPrototype = {
-  base_color = {
-    b = 0.6,
-    g = 0,
-    r = 0.34000000000000004
-  },
-  default_temperature = 42,
-  flow_color = {
-    b = 0.7,
-    g = 0.7,
-    r = 0.7
-  },
-  heat_capacity = "0.2KJ",
-  icon = "__qc-quantum-crucible__/graphics/icons/kvantum.png",
-  icon_mipmaps = 4,
-  icon_size = 64,
-  max_temperature = 42,
-  auto_barrel = false,
-  name = "kvantum",
-  order = "a[fluid]-a[kvantum]",
-  type = "fluid"
-}
-
-data:extend{kvantumPrototype}
+local kvantumPrototype = data.raw["fluid"]["kvantum"]
 
 local kvantumToKvantum =
 {
@@ -202,7 +178,7 @@ local function generate_crucible_recipe(recipe)
       recipe.energy_required = recipe.normal.enabled
     end
 
-    local costMultiplier = (1 / product.count) * (recipe.energy_required or 1)
+    local costMultiplier = (1 / product.count)
     local cost = 0
 
     if kvantumCosts[product.name] ~= nil then
@@ -221,7 +197,7 @@ local function generate_crucible_recipe(recipe)
       end
       cost = cost + (kvantumCosts[i.name]* i.amount)
     end
-    kvantumAmount = cost * costMultiplier * ((recipeTechnologyModifiers[recipe.name] and recipeTechnologyModifiers[recipe.name].modifier) or 1)
+    kvantumAmount = cost * costMultiplier + (recipe.energy_required or 1) + ((recipeTechnologyModifiers[recipe.name] and recipeTechnologyModifiers[recipe.name].modifier) or 1)
     kvantumCosts[product.name] = kvantumAmount
     ::continue::
 

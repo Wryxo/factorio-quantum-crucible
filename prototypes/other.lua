@@ -1,3 +1,29 @@
+-- Setup Kvantum and recipe to make kvantum out of kvantum
+local kvantumPrototype = {
+  base_color = {
+    b = 0.6,
+    g = 0,
+    r = 0.34000000000000004
+  },
+  default_temperature = 42,
+  flow_color = {
+    b = 0.7,
+    g = 0.7,
+    r = 0.7
+  },
+  heat_capacity = "0.2KJ",
+  icon = "__qc-quantum-crucible__/graphics/icons/kvantum.png",
+  icon_mipmaps = 4,
+  icon_size = 64,
+  max_temperature = 42,
+  auto_barrel = false,
+  name = "kvantum",
+  order = "a[fluid]-a[kvantum]",
+  type = "fluid"
+}
+
+data:extend{kvantumPrototype}
+
 data:extend{{ type = "recipe-category", name = "qc-crucible-input" }
 , { type = "recipe-category", name = "qc-crucible-output" }}
 

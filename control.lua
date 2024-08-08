@@ -174,7 +174,7 @@ local function check_logistic_slots(index, slots, recipes)
       goto continue
     end
 
-    if not player.force.recipes[slot.name].enabled then
+    if player.force.recipes[slot.name] and not player.force.recipes[slot.name].enabled then
       goto continue
     end
 
@@ -186,10 +186,12 @@ local function check_logistic_slots(index, slots, recipes)
       missingCount = math.floor(availableKvantum / recipeKvantum)
     end
 
-    local insertedItems = player.insert({name=slot.name, count=missingCount})
-    requiredKvantum = recipeKvantum * insertedItems
-    if requiredKvantum > 0 then
-      global.crucibles[1].crucible.remove_fluid{name = "kvantum", amount = requiredKvantum}
+    if missingCount > 0 then
+      local insertedItems = player.insert({name=slot.name, count=missingCount})
+      requiredKvantum = recipeKvantum * insertedItems
+      if requiredKvantum > 0 then
+        global.crucibles[1].crucible.remove_fluid{name = "kvantum", amount = requiredKvantum}
+      end
     end
     ::continue::
   end
