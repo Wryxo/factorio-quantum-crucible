@@ -32,6 +32,35 @@ local kvantumCosts = {}
 -- Recreate all recipes with kvantum as ingredient
 
 local recipeTechnologyModifiers = {}
+local techDepth = {}
+
+local function getTechnologyDepth(techName, techPrereq, min, technologies)
+  log(techName)
+  if techDepth[techName] then
+    return techDepth[techName]
+  end
+
+  if not techPrereq
+    or techPrereq == 0 
+    or #techPrereq == 0 then
+
+    return min
+  end
+
+  local maxDepth = min
+  for _, prereq in pairs(techPrereq) do
+    for _, t in pairs(technologies) do
+      if t.name == prereq then
+        techDepth[techName] = getTechnologyDepth(t.name, t.prerequisites, #t.unit.ingredients, technologies)
+        if techDepth[techName] > maxDepth then
+          maxDepth = techDepth[techName]
+        end
+      end
+    end
+  end
+
+  return maxDepth + 1
+end
 
 local function calculateRecipeTechnologyModifiers(technologies)
   for _, t in pairs(technologies) do
@@ -55,13 +84,16 @@ local function calculateRecipeTechnologyModifiers(technologies)
       if recipeTechnologyModifiers[r] == nil then
         recipeTechnologyModifiers[r] = {
           technology = t.name,
-          modifier = (t.prerequisites and (#t.unit.ingredients * #t.prerequisites)) or #t.unit.ingredients
+          prerequisites = t.prerequisites
         }
       end
     end
 
+    techDepth[t.name] = getTechnologyDepth(t.name, t.prerequisites, #t.unit.ingredients, technologies)
     ::continue::
   end
+
+  -- log(serpent.block(techDepth))
 end
 
 
@@ -69,37 +101,14 @@ local function generate_crucible_output_recipe(ingType, ingName, ingAmount, resT
   local recipe =
   {
     type = "recipe",
-    name = "qc-output-" .. resName,
+    name = "qc-crucible-" .. resName,
     category = "qc-crucible-output",
     energy_required = 0.002,
-    enabled = enabled,
+    enabled = resType ~= "fluid" and enabled or false,
     hide_from_player_crafting = true,
     ingredients =
     {
       {type = ingType, name = ingName, amount = ingAmount},
-    },
-    results=
-    {
-      {type = resType, name = resName, amount = resAmount},
-    }
-  }
-
-  data:extend({recipe})
-  return recipe
-end
-
-local function generate_crucible_input_recipe(ingType, ingName, ingAmount, resType, resName, resAmount, enabled)
-  local recipe =
-  {
-    type = "recipe",
-    name = "qc-input-" .. ingName,
-    category = "qc-crucible-input",
-    energy_required = 0.002,
-    enabled = enabled,
-    hide_from_player_crafting = true,
-    ingredients =
-    {
-      {type = ingType, name = ingName, amount = ingAmount}
     },
     results=
     {
@@ -167,6 +176,7 @@ local function getRecipe(item)
     ::continue::
   end
 end
+local recipeList = {}
 
 local function generate_crucible_recipe(recipe)
   local products = getProducts(recipe)
@@ -180,6 +190,8 @@ local function generate_crucible_recipe(recipe)
 
     local costMultiplier = (1 / product.count)
     local cost = 0
+    local energy_required = recipe.energy_required or 1
+    local tech_modifier = (recipeTechnologyModifiers[recipe.name] and techDepth[recipeTechnologyModifiers[recipe.name].technology]) or 1
 
     if kvantumCosts[product.name] ~= nil then
       kvantumAmount = kvantumCosts[product.name]
@@ -197,22 +209,19 @@ local function generate_crucible_recipe(recipe)
       end
       cost = cost + (kvantumCosts[i.name]* i.amount)
     end
-    kvantumAmount = cost * costMultiplier + (recipe.energy_required or 1) + ((recipeTechnologyModifiers[recipe.name] and recipeTechnologyModifiers[recipe.name].modifier) or 1)
+
+    kvantumAmount = cost * costMultiplier + (energy_required * tech_modifier)
+    table.insert(recipeList, {recipe.name, cost, costMultiplier, energy_required, tech_modifier, kvantumAmount})
     kvantumCosts[product.name] = kvantumAmount
     ::continue::
 
     local outputRecipe = generate_crucible_output_recipe(kvantumPrototype.type, kvantumPrototype.name, kvantumAmount, product.type, product.name, 1, recipe.enabled)
-    local inputRecipe = generate_crucible_input_recipe(product.type, product.name, 1, kvantumPrototype.type, kvantumPrototype.name, kvantumAmount, recipe.enabled)
 
     local recipeModifier = recipeTechnologyModifiers[recipe.name]
     if recipeModifier ~= nil then
       table.insert(data.raw.technology[recipeModifier.technology].effects, {
         type = "unlock-recipe",
         recipe = outputRecipe.name
-      })
-      table.insert(data.raw.technology[recipeModifier.technology].effects, {
-        type = "unlock-recipe",
-        recipe = inputRecipe.name
       })
     end
   end
@@ -358,5 +367,6 @@ local function generate_crucible_recipes(recipes)
   end
 end
 
-calculateRecipeTechnologyModifiers(data.raw["technology"])
+calculateRecipeTechnologyModifiers(data.raw["technology"], data.raw["recipe"])
 generate_crucible_recipes(data.raw["recipe"])
+log(serpent.block(recipeList))

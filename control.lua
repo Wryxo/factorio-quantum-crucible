@@ -129,7 +129,7 @@ local function clear_trash_slots(player)
   end
   local kvantumGained = 0
   for name, count in pairs(items) do
-    kvantumGained = kvantumGained + (game.recipe_prototypes["qc-input-" .. name].products[1].amount * count)
+    kvantumGained = kvantumGained + (game.recipe_prototypes["qc-crucible-" .. name].ingredients[1].amount * count)
   end
   trashInv.clear()
   
@@ -150,7 +150,7 @@ local function check_logistic_slots(player, slots)
     end
 
     local missingCount = slot.min - itemCount
-    local recipeKvantum = game.recipe_prototypes["qc-output-" .. slot.name].ingredients[1].amount
+    local recipeKvantum = game.recipe_prototypes["qc-crucible-" .. slot.name].ingredients[1].amount
     local requiredKvantum =  recipeKvantum * missingCount
     if requiredKvantum > global.kvantum then
       missingCount = math.floor(global.kvantum / recipeKvantum)
@@ -182,7 +182,7 @@ local function check_io_slots(io)
         goto continue
       end
 
-      local recipeKvantum = game.recipe_prototypes["qc-output-" .. slot.name].ingredients[1].amount
+      local recipeKvantum = game.recipe_prototypes["qc-crucible-" .. slot.name].ingredients[1].amount
 
       if itemCount > slot.count then
         local overflowCount = itemCount - slot.count
