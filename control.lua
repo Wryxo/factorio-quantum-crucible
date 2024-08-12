@@ -99,7 +99,7 @@ local function update_crucible_amount()
     local current = global.kvantum
     local max = global.kvantum_max
     -- progressbar.caption = "Kvantum: " .. format_number(current,true,10^6) .. " / " .. format_number(max, true, 0)
-    progressbar.caption = format_number(current,true,10^6)
+    progressbar.caption = format_number(current,true,10^24)
     progressbar.value = current / max
   end
 end
@@ -230,7 +230,7 @@ script.on_event(defines.events.on_player_created, function(event)
     progressbar.style.color = {r=0.7, g=0, b=0.7, a=0.3}
     local current = global.kvantum
     local max = global.kvantum_max
-    progressbar.caption = format_number(current,true,10^6)
+    progressbar.caption = format_number(current,true,10^24)
     progressbar.value = current / max 
 end)
 

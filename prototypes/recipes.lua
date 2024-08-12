@@ -25,6 +25,37 @@ local kvantumToKvantum =
 
 data:extend({kvantumToKvantum})
 
+function format_number(amount, append_suffix, minimum)
+  local suffix = ""
+  if append_suffix and amount >= minimum then
+    local suffix_list =
+      {
+          Y = 10^24,
+          Z = 10^21,
+          E = 10^18,
+          P = 10^15,
+          T = 10^12,
+          G = 10^9,
+          M = 10^6,
+          K = 10^3
+      }
+    for letter, limit in pairs (suffix_list) do
+      if math.abs(amount) >= limit then
+        amount = math.floor(amount/(limit/10))/10
+        suffix = letter
+        break
+      end
+    end
+  end
+  local formatted, k = math.floor(amount)
+  while true do
+    formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
+    if (k==0) then
+      break
+    end
+  end
+  return formatted..suffix
+end
 
 -- Setup kvantum recipes for raw resources
 local kvantumCosts = {}
@@ -116,6 +147,22 @@ local function generate_crucible_output_recipe(ingType, ingName, ingAmount, resT
     }
   }
 
+  local itemPrototype = data.raw["item"][resName]
+    or data.raw["gun"][resName]
+    or data.raw["armor"][resName]
+    or data.raw["ammo"][resName]
+    or data.raw["tool"][resName]
+    or data.raw["repair-tool"][resName]
+    or data.raw["straight-rail"][resName]
+    or data.raw["curved-rail"][resName]
+    or data.raw["item-with-entity-data"][resName]
+    or data.raw["spidertron-remote"][resName]
+    or data.raw["module"][resName]
+    or data.raw["capsule"][resName]
+
+  if itemPrototype then
+    itemPrototype.localised_description = {"?", {"", {"", "[fluid=kvantum]", format_number(ingAmount, true, 10^24), "\n"}, {"item-description." .. resName}}, {"", "[fluid=kvantum]", format_number(ingAmount, true, 10^24)}}
+  end
   data:extend({recipe})
   return recipe
 end
